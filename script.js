@@ -66,16 +66,28 @@ function rgbToHSL(rgb){
 
 // takes hex-string, rgb-object and hsl object and updates the view.
 function showNewColorValues(hex, rgb, hsl){
-    console.log(hex);
-    console.log(rgb);
-    console.log(hsl);
-    let colorSwatch = document.querySelector(".colorSwatch");
-    let rgbLi = document.querySelector("#rgb");
-    let hslLi = document.querySelector("#hsl");
-    let hexLi = document.querySelector("#hex");
+    showHexString(hex);
+    updateColorSwatch(hex);
+    showRgbString(rgb);
+    showHSLString(hsl);
+}
 
-    rgbLi.textContent = `R: ${rgb.r} G:${rgb.g} B:${rgb.b}`;
-    hslLi.textContent = `H: ${Math.round(hsl.h)} S:${Math.round(hsl.s)} L:${Math.round(hsl.l)}`;
+function showHexString(hex){
+    let hexLi = document.querySelector("#hex");
     hexLi.textContent = hex;
+}
+
+function showRgbString(rgb){
+    let rgbLi = document.querySelector("#rgb");
+    rgbLi.textContent = `R: ${rgb.r} G:${rgb.g} B:${rgb.b}`;
+}
+
+function showHSLString(hsl){
+    let hslLi = document.querySelector("#hsl");    
+    hslLi.textContent = `H: ${Math.round(hsl.h)} S:${Math.round(hsl.s)} L:${Math.round(hsl.l)}`;
+}
+
+function updateColorSwatch(hexString){
+    let colorSwatch = document.querySelector(".colorSwatch");
     colorSwatch.style.backgroundColor = hex;
 }

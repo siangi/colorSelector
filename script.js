@@ -89,5 +89,5 @@ function showHSLString(hsl){
 
 function updateColorSwatch(hexString){
     let colorSwatch = document.querySelector(".colorSwatch");
-    colorSwatch.style.backgroundColor = hex;
+    colorSwatch.style.backgroundColor = hexString;
 }

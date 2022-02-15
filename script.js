@@ -4,13 +4,19 @@ window.onload = init;
 
 function init(){
     let colorInput = document.querySelector("#colorSelector");
-    colorInput.addEventListener("input", onColorChange)
+    colorInput.addEventListener("input", onColorChange, false);
+    onColorChange();
+    console.log(colorInput);
 }
 
-function onColorChange(event){
-    let hexColor = event.target.value;
-    showNewColorValues(hexColor, hexToRgb(hexColor), hexToHSL(hexColor));
+function onColorChange(){
+    console.log("entered Event");
+    let hexColor = document.querySelector("#colorSelector").value;
+    let rgb = hexToRgb(hexColor);
+    let hsl = rgbToHSL(rgb)
+    showNewColorValues(hexColor, rgb, hsl);
 }
+
 // takes a hex-color-string returns a object with r, g, b properties
 function hexToRgb(color){
     let rgbObj = {r:0, g:0, b:0};
@@ -22,10 +28,7 @@ function hexToRgb(color){
     return rgbObj;
 }
 
-// takes a hex-color-string returns an Object with h, s, l properties
-function hexToHSL(color){
-    let rgb = hexToRgb(color);
- 
+function rgbToHSL(rgb){
     let h, s, l;
  
     const min = Math.min(rgb.r,rgb.g,rgb.b);
@@ -55,10 +58,10 @@ function hexToHSL(color){
     }
     // multiply s and l by 100 to get the value in percent, rather than [0,1]
     s *= 100;
-    l *= 100;
+    // l *= 100;
     
     console.log("hsl(%f,%f%,%f%)", h, s, l); // just for testing
-    return ({h: h, s: s, l: l});
+    return ({h, s, l});
 }
 
 // takes hex-string, rgb-object and hsl object and updates the view.

@@ -1,4 +1,34 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+input {
+  width: 13vw;
+  margin: 1vw;
+}
+
 .colorSwatch {
-  height: 10vh;
-  width: 10vw;
+  width: 100%;
+  height: 20%;
+}
+
+#colorValues {
+  width: 13vw;
+  height: 13vw;
+  /* border: 0.1em solid lightgrey; */
+  border-radius: 2vw;
+  overflow: hidden;
+  box-shadow: 0em 0em 1em lightgray;
+}
+
+#colorValues ul {
+  padding-left: 0;
+  margin: 1em;
+}
+#colorValues ul li {
+  list-style-type: none;
+  text-align: center;
+  margin-bottom: 0.5em;
 }

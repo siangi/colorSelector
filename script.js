@@ -1,21 +1,42 @@
 "use stirct";
 
+const Color = {
+    rgb: {},
+    hsl: {},
+    hex:"",
+}
+
+// Controller Start
+
 window.onload = init;
 
 function init(){
     let colorInput = document.querySelector("#colorSelector");
     colorInput.addEventListener("input", onColorChange, false);
     onColorChange();
-    console.log(colorInput);
 }
 
 function onColorChange(){
-    console.log("entered Event");
     let hexColor = document.querySelector("#colorSelector").value;
-    let rgb = hexToRgb(hexColor);
-    let hsl = rgbToHSL(rgb)
-    showNewColorValues(hexColor, rgb, hsl);
+    updatePalette(createDummyColorArray(hexColor), document.querySelectorAll(".colorCard"));
 }
+
+function createDummyColorArray(hex){
+    let rgb = hexToRgb(hex);
+    let hsl = rgbToHSL(rgb)
+    let result = [];
+    for (let i = 0; i < 5; i++){
+        let color = Object.create(Color);
+        color.rgb = rgb;
+        color.hex = hex;
+        color.hsl = hsl;
+        result.push(color);
+    }
+
+    return result;
+}
+
+// modelStart
 
 // takes a hex-color-string returns a object with r, g, b properties
 function hexToRgb(color){
@@ -24,7 +45,6 @@ function hexToRgb(color){
     rgbObj.r = parseInt(color.substring(1, 3), 16);
     rgbObj.g = parseInt(color.substring(3, 5), 16);
     rgbObj.b = parseInt(color.substring(5, 7), 16);
-    console.log(rgbObj)
     return rgbObj;
 }
 
@@ -59,35 +79,47 @@ function rgbToHSL(rgb){
     // multiply s and l by 100 to get the value in percent, rather than [0,1]
     s *= 100;
     // l *= 100;
-    
-    console.log("hsl(%f,%f%,%f%)", h, s, l); // just for testing
+
     return ({h, s, l});
 }
 
-// takes hex-string, rgb-object and hsl object and updates the view.
-function showNewColorValues(hex, rgb, hsl){
-    showHexString(hex);
-    updateColorSwatch(hex);
-    showRgbString(rgb);
-    showHSLString(hsl);
+// View Start
+
+function updatePalette(colors, cards){
+    if (colors.length != cards.length){
+        console.error("amount of colors and cards are mismatched, will not display anything");
+        return;
+    }
+
+    for(let i = 0; i < colors.length; i++){
+        updateColorCard(colors[i].hex, colors[i].rgb, colors[i].hsl, cards[i]);
+    }
 }
 
-function showHexString(hex){
-    let hexLi = document.querySelector("#hex");
+// takes hex-string, rgb-object and hsl object and updates the card with the proper values
+function updateColorCard(hex, rgb, hsl, card){
+    showHexString(hex, card);
+    updateColorSwatch(hex, card);
+    showRgbString(rgb, card);
+    showHSLString(hsl, card);
+}
+
+function showHexString(hex, parent){
+    let hexLi = parent.querySelector(".hexVal");
     hexLi.textContent = hex;
 }
 
-function showRgbString(rgb){
-    let rgbLi = document.querySelector("#rgb");
+function showRgbString(rgb, parent){
+    let rgbLi = parent.querySelector(".rgbVal");
     rgbLi.textContent = `R: ${rgb.r} G:${rgb.g} B:${rgb.b}`;
 }
 
-function showHSLString(hsl){
-    let hslLi = document.querySelector("#hsl");    
+function showHSLString(hsl, parent){
+    let hslLi = parent.querySelector(".hslVal");    
     hslLi.textContent = `H: ${Math.round(hsl.h)} S:${Math.round(hsl.s)} L:${Math.round(hsl.l)}`;
 }
 
-function updateColorSwatch(hexString){
-    let colorSwatch = document.querySelector(".colorSwatch");
+function updateColorSwatch(hexString, parent){
+    let colorSwatch = parent.querySelector(".colorSwatch");
     colorSwatch.style.backgroundColor = hexString;
 }

@@ -1,4 +1,13 @@
 "use stirct";
+const COLORCOUNT = 5;
+const MODES = {
+    ANALOGOUS: "analog",
+    MONOCHROMATIC: "mono",
+    TRIAD: "triad",
+    COMPLEMENT: "complement",
+    COMPOUND: "compound",
+    SHADES: "shades"
+}
 
 const Color = {
     rgb: {},
@@ -6,19 +15,32 @@ const Color = {
     hex:"",
 }
 
-// Controller Start
+function createColorFromHex(hex){
+    let color = Object.create(Color);
 
+    color.rgb = hexToRgb(hex);
+    color.hex = hex;
+    color.hsl = rgbToHSL(color.rgb);
+
+    return color;
+}
+
+// Controller Start
 window.onload = init;
 
 function init(){
     let colorInput = document.querySelector("#colorSelector");
-    colorInput.addEventListener("input", onColorChange, false);
-    onColorChange();
+    colorInput.addEventListener("input", onColorOrModeChange, false);
+    let modeInput = document.querySelector("#modeSelector");
+    modeInput.addEventListener("change", onColorOrModeChange, false);
+    onColorOrModeChange();
 }
 
-function onColorChange(){
+function onColorOrModeChange(){
+    let mode = document.querySelector("#modeSelector").value;
     let hexColor = document.querySelector("#colorSelector").value;
-    updatePalette(createDummyColorArray(hexColor), document.querySelectorAll(".colorCard"));
+    let palette = createPalette(hexColor, mode);
+    showPalette(palette, document.querySelectorAll(".colorCard"));
 }
 
 function createDummyColorArray(hex){
@@ -83,21 +105,76 @@ function rgbToHSL(rgb){
     return ({h, s, l});
 }
 
+function createPalette(baseColorHex, mode){
+    let baseColor = createColorFromHex(baseColorHex);
+    let palette;
+
+    switch (mode) {
+        case MODES.ANALOGOUS:
+            palette = analogousPalette(baseColor, COLORCOUNT)
+            break;
+        case MODES.MONOCHROMATIC:
+            palette = monochromePalette(baseColor, COLORCOUNT);
+            break;
+        case MODES.TRIAD:
+            palette = triadPalette(baseColor, COLORCOUNT);
+            break;
+        case MODES.COMPLEMENT:
+            palette = complementPalette(baseColor, COLORCOUNT);
+            break;
+        case MODES.COMPOUND:
+            palette = compoundPalette(baseColor, COLORCOUNT);
+            break;
+        case MODES.SHADES:
+            palette = shadesPalette(baseColor, COLORCOUNT);
+            break;    
+        default:
+            console.error("mode not available: ", mode);
+            break;
+    }
+    palette = createDummyColorArray(baseColorHex);
+    return palette;
+}
+
+function analogousPalette(baseColor, colorCount){
+    console.log("analog");
+}
+
+function monochromePalette(baseColor, colorCount){
+
+}
+
+function triadPalette(baseColor, colorCount){
+
+}
+
+function complementPalette(baseColor, colorCount){
+    console.log("complement");
+}
+
+function compoundPalette(baseColor, colorCount){
+
+}
+
+function shadesPalette(baseColor, colorCount){
+
+}
+
 // View Start
 
-function updatePalette(colors, cards){
+function showPalette(colors, cards){
     if (colors.length != cards.length){
         console.error("amount of colors and cards are mismatched, will not display anything");
         return;
     }
 
     for(let i = 0; i < colors.length; i++){
-        updateColorCard(colors[i].hex, colors[i].rgb, colors[i].hsl, cards[i]);
+        showColorCard(colors[i].hex, colors[i].rgb, colors[i].hsl, cards[i]);
     }
 }
 
 // takes hex-string, rgb-object and hsl object and updates the card with the proper values
-function updateColorCard(hex, rgb, hsl, card){
+function showColorCard(hex, rgb, hsl, card){
     showHexString(hex, card);
     updateColorSwatch(hex, card);
     showRgbString(rgb, card);

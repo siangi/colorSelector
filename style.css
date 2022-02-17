@@ -6,8 +6,9 @@ body {
   font-size: 1.5em;
 }
 
-input {
-  width: vw;
+input,
+select {
+  width: 18vw;
   margin: 1vw;
 }
 

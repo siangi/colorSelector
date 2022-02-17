@@ -1,21 +1,23 @@
 "use stirct";
 const COLORCOUNT = 5;
+const MIDDLEINDEX = 2;
+
 const MODES = {
     ANALOGOUS: "analog",
     MONOCHROMATIC: "mono",
     TRIAD: "triad",
     COMPLEMENT: "complement",
     COMPOUND: "compound",
-    SHADES: "shades"
-}
+    SHADES: "shades",
+};
 
 const Color = {
     rgb: {},
     hsl: {},
-    hex:"",
-}
+    hex: "",
+};
 
-function createColorFromHex(hex){
+function createColorFromHex(hex) {
     let color = Object.create(Color);
 
     color.rgb = hexToRgb(hex);
@@ -25,10 +27,19 @@ function createColorFromHex(hex){
     return color;
 }
 
+function createColorFromHsl(hsl) {
+    let color = Object.create(Color);
+    color.rgb = HslToRgb(hsl);
+    color.hsl = hsl;
+    color.hex = rgbToHex(color.rgb);
+
+    return color;
+}
+
 // Controller Start
 window.onload = init;
 
-function init(){
+function init() {
     let colorInput = document.querySelector("#colorSelector");
     colorInput.addEventListener("input", onColorOrModeChange, false);
     let modeInput = document.querySelector("#modeSelector");
@@ -36,18 +47,18 @@ function init(){
     onColorOrModeChange();
 }
 
-function onColorOrModeChange(){
+function onColorOrModeChange() {
     let mode = document.querySelector("#modeSelector").value;
     let hexColor = document.querySelector("#colorSelector").value;
     let palette = createPalette(hexColor, mode);
     showPalette(palette, document.querySelectorAll(".colorCard"));
 }
 
-function createDummyColorArray(hex){
+function createDummyColorArray(hex) {
     let rgb = hexToRgb(hex);
-    let hsl = rgbToHSL(rgb)
+    let hsl = rgbToHSL(rgb);
     let result = [];
-    for (let i = 0; i < 5; i++){
+    for (let i = 0; i < 5; i++) {
         let color = Object.create(Color);
         color.rgb = rgb;
         color.hex = hex;
@@ -61,57 +72,113 @@ function createDummyColorArray(hex){
 // modelStart
 
 // takes a hex-color-string returns a object with r, g, b properties
-function hexToRgb(color){
-    let rgbObj = {r:0, g:0, b:0};
+function hexToRgb(hexColor) {
+    let rgbObj = { r: 0, g: 0, b: 0 };
 
-    rgbObj.r = parseInt(color.substring(1, 3), 16);
-    rgbObj.g = parseInt(color.substring(3, 5), 16);
-    rgbObj.b = parseInt(color.substring(5, 7), 16);
+    rgbObj.r = parseInt(hexColor.substring(1, 3), 16);
+    rgbObj.g = parseInt(hexColor.substring(3, 5), 16);
+    rgbObj.b = parseInt(hexColor.substring(5, 7), 16);
     return rgbObj;
 }
 
-function rgbToHSL(rgb){
-    let h, s, l;
- 
-    const min = Math.min(rgb.r,rgb.g,rgb.b);
-    const max = Math.max(rgb.r,rgb.g,rgb.b);
-  
-    if( max === min ) {
-        h = 0;
-    } else
-    if (max === rgb.r) {
-        h = 60 * (0 + (rgb.g - rgb.b) / (max - min) );
-    } else
-    if (max === rgb.g) {
-        h = 60 * (2 + (rgb.b - rgb.r) / (max - min) );
-    } else
-    if (max === rgb.b) {
-        h = 60 * (4 + (rgb.r - rgb.g) / (max - min) );
-    }
-    
-    if (h < 0) {h = h + 360; }
-    
-    l = (min + max) / 2;
-    
-    if (max === 0 || min === 1 ) {
-        s = 0;
-    } else {
-        s = (max - l) / ( Math.min(l,1-l));
-    }
-    // multiply s and l by 100 to get the value in percent, rather than [0,1]
-    s *= 100;
-    // l *= 100;
-
-    return ({h, s, l});
+function rgbToHex(rgb) {
+    let hexR = rgb.r.toString(16).padStart(2, "0");
+    let hexG = rgb.g.toString(16).padStart(2, "0");
+    let hexB = rgb.b.toString(16).padStart(2, "0");
+    return "#" + hexR + hexG + hexB;
 }
 
-function createPalette(baseColorHex, mode){
+// from css-Tricks
+function rgbToHSL(rgb) {
+    r = rgb.r / 255;
+    g = rgb.g / 255;
+    b = rgb.b / 255;
+
+    // Find greatest and smallest channel values
+    let cmin = Math.min(r, g, b),
+        cmax = Math.max(r, g, b),
+        delta = cmax - cmin,
+        h = 0,
+        s = 0,
+        l = 0;
+
+    if (delta == 0) h = 0;
+    // Red is max
+    else if (cmax == r) h = ((g - b) / delta) % 6;
+    // Green is max
+    else if (cmax == g) h = (b - r) / delta + 2;
+    // Blue is max
+    else h = (r - g) / delta + 4;
+
+    h = Math.round(h * 60);
+
+    // Make negative hues positive behind 360°
+    if (h < 0) h += 360;
+
+    //calculate lightness
+    l = (cmax + cmin) / 2;
+
+    // Calculate saturation
+    s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+    // Multiply l and s by 100
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return { h, s, l };
+}
+
+// from fronter
+function HslToRgb(hsl) {
+    let h = hsl.h;
+    let s = hsl.s / 100;
+    let l = hsl.l / 100;
+
+    let c = (1 - Math.abs(2 * l - 1)) * s,
+        x = c * (1 - Math.abs(((h / 60) % 2) - 1)),
+        m = l - c / 2,
+        r = 0,
+        g = 0,
+        b = 0;
+    if (0 <= h && h < 60) {
+        r = c;
+        g = x;
+        b = 0;
+    } else if (60 <= h && h < 120) {
+        r = x;
+        g = c;
+        b = 0;
+    } else if (120 <= h && h < 180) {
+        r = 0;
+        g = c;
+        b = x;
+    } else if (180 <= h && h < 240) {
+        r = 0;
+        g = x;
+        b = c;
+    } else if (240 <= h && h < 300) {
+        r = x;
+        g = 0;
+        b = c;
+    } else if (300 <= h && h < 360) {
+        r = c;
+        g = 0;
+        b = x;
+    }
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+
+    return { r, g, b };
+}
+
+function createPalette(baseColorHex, mode) {
     let baseColor = createColorFromHex(baseColorHex);
     let palette;
 
     switch (mode) {
         case MODES.ANALOGOUS:
-            palette = analogousPalette(baseColor, COLORCOUNT)
+            palette = analogousPalette(baseColor, COLORCOUNT);
             break;
         case MODES.MONOCHROMATIC:
             palette = monochromePalette(baseColor, COLORCOUNT);
@@ -127,76 +194,143 @@ function createPalette(baseColorHex, mode){
             break;
         case MODES.SHADES:
             palette = shadesPalette(baseColor, COLORCOUNT);
-            break;    
+            break;
         default:
             console.error("mode not available: ", mode);
             break;
     }
-    palette = createDummyColorArray(baseColorHex);
+    // palette = createDummyColorArray(baseColorHex);
     return palette;
 }
 
-function analogousPalette(baseColor, colorCount){
-    console.log("analog");
+function analogousPalette(baseColor) {
+    const H_VALUE = 20;
+    let palette = [];
+
+    for (let i = 0; i < COLORCOUNT; i++) {
+        let newHSL = { ...baseColor.hsl };
+
+        // in the middle we want to keep the base, so nothing is changed
+        if (i < MIDDLEINDEX) {
+            newHSL.h = rotateHue(baseColor.hsl.h, -H_VALUE * Math.abs(MIDDLEINDEX - i));
+        } else if (i > MIDDLEINDEX) {
+            newHSL.h = rotateHue(baseColor.hsl.h, H_VALUE * Math.abs(MIDDLEINDEX - i));
+        }
+
+        let newColor = createColorFromHsl(newHSL);
+        palette.push(newColor);
+    }
+
+    return palette;
 }
 
-function monochromePalette(baseColor, colorCount){
+function monochromePalette(baseColor, colorCount) {}
 
+function triadPalette(baseColor, colorCount) {
+    SHIFTVAL = 60;
+    L_SHIFT = 10;
+    let palette = [];
+
+    for (let i = 0; i < COLORCOUNT; i++) {
+        let newHSL = { ...baseColor.hsl };
+
+        if (i < MIDDLEINDEX) {
+            newHSL.h = rotateHue(baseColor.hsl.h, SHIFTVAL);
+
+            if (i !== MIDDLEINDEX - 1) {
+                newHSL.s = Math.min(100, Math.max(0, newHSL.s - L_SHIFT * (MIDDLEINDEX - i)));
+            }
+        } else if (i > MIDDLEINDEX) {
+            newHSL.h = rotateHue(baseColor.hsl.h, SHIFTVAL * 2);
+
+            if (i !== MIDDLEINDEX + 1) {
+                newHSL.s = Math.min(100, Math.max(0, newHSL.s - L_SHIFT * (MIDDLEINDEX - i)));
+            }
+        }
+
+        let newColor = createColorFromHsl(newHSL);
+        palette.push(newColor);
+    }
+
+    return palette;
 }
 
-function triadPalette(baseColor, colorCount){
-
-}
-
-function complementPalette(baseColor, colorCount){
+function complementPalette(baseColor, colorCount) {
     console.log("complement");
 }
 
-function compoundPalette(baseColor, colorCount){
+function compoundPalette(baseColor, colorCount) {}
 
+function shadesPalette(baseColor, colorCount) {
+    const L_DIFF = 15;
+    let palette = [];
+
+    for (let i = 0; i < COLORCOUNT; i++) {
+        let newHSL = { ...baseColor.hsl };
+
+        // in the middle we want to keep the base, so nothing is changed
+        if (i != MIDDLEINDEX) {
+            newHSL.l += L_DIFF * (MIDDLEINDEX - i);
+        }
+
+        let newColor = createColorFromHsl(newHSL);
+        palette.push(newColor);
+    }
+
+    return palette;
 }
 
-function shadesPalette(baseColor, colorCount){
+function rotateHue(base, rotation) {
+    const HSL_MAX = 358;
+    let rotated = base + rotation;
 
+    if (rotated < 0) {
+        // need to add, because rotated will be sub zero
+        rotated = HSL_MAX + rotated;
+    } else if (rotated > HSL_MAX) {
+        rotated = rotated - HSL_MAX;
+    }
+
+    return rotated;
 }
 
 // View Start
 
-function showPalette(colors, cards){
-    if (colors.length != cards.length){
+function showPalette(colors, cards) {
+    if (colors.length != cards.length) {
         console.error("amount of colors and cards are mismatched, will not display anything");
         return;
     }
 
-    for(let i = 0; i < colors.length; i++){
+    for (let i = 0; i < colors.length; i++) {
         showColorCard(colors[i].hex, colors[i].rgb, colors[i].hsl, cards[i]);
     }
 }
 
 // takes hex-string, rgb-object and hsl object and updates the card with the proper values
-function showColorCard(hex, rgb, hsl, card){
+function showColorCard(hex, rgb, hsl, card) {
     showHexString(hex, card);
     updateColorSwatch(hex, card);
     showRgbString(rgb, card);
     showHSLString(hsl, card);
 }
 
-function showHexString(hex, parent){
+function showHexString(hex, parent) {
     let hexLi = parent.querySelector(".hexVal");
     hexLi.textContent = hex;
 }
 
-function showRgbString(rgb, parent){
+function showRgbString(rgb, parent) {
     let rgbLi = parent.querySelector(".rgbVal");
     rgbLi.textContent = `R: ${rgb.r} G:${rgb.g} B:${rgb.b}`;
 }
 
-function showHSLString(hsl, parent){
-    let hslLi = parent.querySelector(".hslVal");    
+function showHSLString(hsl, parent) {
+    let hslLi = parent.querySelector(".hslVal");
     hslLi.textContent = `H: ${Math.round(hsl.h)} S:${Math.round(hsl.s)} L:${Math.round(hsl.l)}`;
 }
 
-function updateColorSwatch(hexString, parent){
+function updateColorSwatch(hexString, parent) {
     let colorSwatch = parent.querySelector(".colorSwatch");
     colorSwatch.style.backgroundColor = hexString;
 }

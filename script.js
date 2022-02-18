@@ -224,7 +224,29 @@ function analogousPalette(baseColor) {
     return palette;
 }
 
-function monochromePalette(baseColor, colorCount) {}
+function monochromePalette(baseColor, colorCount) {
+    L_SHIFT = 10;
+    S_SHIFT = 20;
+    let palette = [];
+
+    for (let i = 0; i < COLORCOUNT; i++) {
+        let newHSL = { ...baseColor.hsl };
+
+        if (i !== MIDDLEINDEX) {
+            // only change either l or s, so we alternate
+            if (i % 2 == 0) {
+                newHSL.l = clamp(0, 100, newHSL.l + L_SHIFT * (MIDDLEINDEX - i));
+            } else {
+                newHSL.s = clamp(0, 100, newHSL.s + S_SHIFT * (MIDDLEINDEX - i));
+            }
+        }
+
+        let newColor = createColorFromHsl(newHSL);
+        palette.push(newColor);
+    }
+
+    return palette;
+}
 
 function triadPalette(baseColor, colorCount) {
     SHIFTVAL = 60;
@@ -236,17 +258,11 @@ function triadPalette(baseColor, colorCount) {
 
         if (i < MIDDLEINDEX) {
             newHSL.h = rotateHue(baseColor.hsl.h, SHIFTVAL);
-
-            if (i !== MIDDLEINDEX - 1) {
-                newHSL.s = Math.min(100, Math.max(0, newHSL.s - L_SHIFT * (MIDDLEINDEX - i)));
-            }
         } else if (i > MIDDLEINDEX) {
             newHSL.h = rotateHue(baseColor.hsl.h, SHIFTVAL * 2);
-
-            if (i !== MIDDLEINDEX + 1) {
-                newHSL.s = Math.min(100, Math.max(0, newHSL.s - L_SHIFT * (MIDDLEINDEX - i)));
-            }
         }
+
+        newHSL.s = clamp(0, 100, newHSL.s - L_SHIFT * (MIDDLEINDEX - i));
 
         let newColor = createColorFromHsl(newHSL);
         palette.push(newColor);
@@ -256,10 +272,46 @@ function triadPalette(baseColor, colorCount) {
 }
 
 function complementPalette(baseColor, colorCount) {
-    console.log("complement");
+    const OPPOSITE_HUE = 180;
+    let palette = [];
+
+    for (let i = 0; i < COLORCOUNT; i++) {
+        let newHSL = { ...baseColor.hsl };
+
+        if (i === COLORCOUNT - 1) {
+            newHSL.h = rotateHue(newHSL.h, OPPOSITE_HUE);
+        } else if (i !== MIDDLEINDEX) {
+            let rotation = (OPPOSITE_HUE / COLORCOUNT) * (i + 1);
+            newHSL.h = rotateHue(newHSL.h, rotation);
+        }
+
+        let newColor = createColorFromHsl(newHSL);
+        palette.push(newColor);
+    }
+
+    return palette;
 }
 
-function compoundPalette(baseColor, colorCount) {}
+function compoundPalette(baseColor, colorCount) {
+    const OPPOSITE_HUE = 180;
+    let palette = [];
+
+    for (let i = 0; i < COLORCOUNT; i++) {
+        let newHSL = { ...baseColor.hsl };
+
+        if (i === COLORCOUNT - 1) {
+            newHSL.h = rotateHue(newHSL.h, OPPOSITE_HUE);
+        } else if (i !== MIDDLEINDEX) {
+            let rotation = (OPPOSITE_HUE / COLORCOUNT) * (i + 1);
+            newHSL.h = rotateHue(newHSL.h, rotation);
+        }
+
+        let newColor = createColorFromHsl(newHSL);
+        palette.push(newColor);
+    }
+
+    return palette;
+}
 
 function shadesPalette(baseColor, colorCount) {
     const L_DIFF = 15;
@@ -292,6 +344,10 @@ function rotateHue(base, rotation) {
     }
 
     return rotated;
+}
+
+function clamp(min, max, value) {
+    return Math.max(min, Math.min(max, value));
 }
 
 // View Start
